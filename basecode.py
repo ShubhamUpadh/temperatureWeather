@@ -5,7 +5,7 @@ baseUrl = "https://api.openweathermap.org/data/2.5/weather?"
 apikey = open('apikey.txt', 'r').read()
 
 print(type(apikey))
-city = "Delhi"
+city = "Melbourne,AU"
 
 url = baseUrl + "appid=" + apikey + "&q=" + city
 

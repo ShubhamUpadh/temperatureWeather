@@ -22,18 +22,18 @@ textCol = {
 def fxtempReturn(city):
     baseUrl = "https://api.openweathermap.org/data/2.5/weather?"
     apikey = open('apikey.txt', 'r').read()
-    city = "Delhi"
     url = baseUrl + "appid=" + apikey + "&q=" + city
     response = requests.get(url).json()
     return response
 
 
 def fxfactsAPI():
-    limit = 1
-    api_url = 'https://api.api-ninjas.com/v1/facts?limit={1}'
+
+    api_url = 'https://api.api-ninjas.com/v1/facts?limit=1'
 
     apikeyFacts = open('apikeyfacts.txt', 'r').read()
     response = requests.get(api_url, headers={apikeyFacts: 'YOUR_API_KEY'})
+    print(response)
 
     if response.status_code == requests.codes.ok:
         return response.text
@@ -53,7 +53,7 @@ def fxgreetMsg():
 
 
 greetMsg = fxgreetMsg()
-print(fxtempReturn("Delhi"))
+# print(fxtempReturn("Delhi"))
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
@@ -77,35 +77,40 @@ app.layout = html.Div(style={'paddingTop': 50}, children=[
 
         ]),
 
-        dbc.Row([html.Div(html.B("I will tell you the longest english dictionary word that doesn't contain the "
-                                 "entered alphabets."),
-                          style={'fontSize': 20, 'color': '#FFF', 'textAlign': 'center',
+        dbc.Row([html.Div(html.B("-Just a random fact-"),
+                          style={'fontSize': 15, 'color': '#000', 'textAlign': 'right',
                                  'marginBottom': 20})
-                 ]),
-
-        dbc.Row([html.Div(html.B("For example, the longest dictionary word that doesn't contain the alphabets (a, x, i,"
-                                 " s) is HYDROMETEOROLOGY."),
-                          style={'fontSize': 20, 'color': '#FFF', 'textAlign': 'center',
-                                 'marginBottom': 30, 'marginTop': 30})
                  ]),
 
         html.Hr(style={'color': '#FFF'}),
 
-        dbc.Row([html.Div(html.B("Enter the alphabets that the word SHOULD NOT contain : "),
-                          style={'fontSize': 20, 'color': '#FFF', 'textAlign': 'center',
-                                 'marginBottom': 5, 'marginTop': 15})
-                 ]),
 
-        dbc.Row(
-            [html.Div(dcc.Input(id='my-input', value='', type='text'),
-                      style={'marginTop': 0, 'textAlign': 'center', 'fontSize': 20, 'color': '#FFF'})
-             ]),
+
+        dbc.Row(children=[
+            dbc.Col(width=4),
+            dbc.Col(
+                [html.Div(
+                    dcc.Dropdown(
+                        options=[
+                            {'label': 'Delhi', 'value': 'Delhi'},
+                            {'label': 'Ghaziabad', 'value': 'Ghaziabad'},
+                            {'label': 'Bangalore', 'value': 'Bengaluru'},
+                            {'label': 'Melbourne', 'value': 'Melbourne, AU'},
+
+                        ],
+                        value="Delhi", placeholder="Select a city",
+                        id="demo-dropdown"
+                    ),
+                )
+                ], width=4),
+            dbc.Col(width=4)
+        ]),
 
         html.Br(),
 
-        dbc.Row([html.Div(html.B(id='my-output'),
+        dbc.Row([html.Div(html.B(id='dd-output-container'),
                           style={'marginTop': 10, 'marginBottom': 15, 'textAlign': 'center', 'fontSize': 20,
-                                 'color': '#FFF'})
+                                 'color': '#000'})
                  ]),
 
         html.Hr(style={'color': '#FFF'})
@@ -116,56 +121,18 @@ app.layout = html.Div(style={'paddingTop': 50}, children=[
 
 
 @app.callback(
-    Output(component_id='my-output', component_property='children'),
-    Input(component_id='my-input', component_property='value')
+    Output('dd-output-container', 'children'),
+    Input('demo-dropdown', 'value')
 )
 def update_output_div(input_value):
-    '''check = True
+    if input_value is None:
+        return "Weather stats of the selected city will appear here"
 
-    if len(input_value) == 0:
-        return "NO INPUT DETECTED"
-    z = list()
-    for alpha in input_value:
-        if alpha.isalpha() and not alpha in z:
-            z.append(alpha)
-            check = False
+    res = fxtempReturn(input_value)
 
-    if check:
-        return "NO INPUT DETECTED"
-
-    print(z)
-
-    lenWord = 0
-    longestWord = ""
-
-    with open("dictionaryPreprocessed.csv", mode='r') as file:
-        fileF = csv.reader(file)
-        for lines in fileF:
-
-            flag = True
-
-            for alphabet in z:
-                if alphabet.lower() in str(lines) or alphabet.upper() in str(lines):
-                    flag = False
-                    break
-
-            if flag and lenWord < len(str(lines)) and not " " in str(lines):
-                longestWord = str(lines)
-                lenWord = len(str(lines))
-
-    if longestWord == "" or len(longestWord) == 5:
-        return "No such word exists :( "
-
-    elif input_value in ('Bijoy', 'bijoy'):
-        return "BIJOY JADAV"
-
-    elif input_value == 'Vivek':
-        return "MANAGER MARAJ"
-
-    else:
-        return str(longestWord[2:-2]).upper()'''
-
-    return "HELLO"
+    return (
+        f"In {input_value}, current temperature is {str(res['main']['temp'] - 273.15)[0:5]} C. The humidity is {res['main']['humidity']} %"
+        f" and the current wind speed is {res['wind']['speed']}")
 
 
 if __name__ == "__main__":
