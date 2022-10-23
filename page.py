@@ -3,6 +3,7 @@ import csv
 import dash_bootstrap_components as dbc
 from dash import html, Input, Output, dcc
 from datetime import datetime
+import requests
 
 colors = {
     'background': '#000000'
@@ -18,6 +19,28 @@ textCol = {
 }
 
 
+def fxtempReturn(city):
+    baseUrl = "https://api.openweathermap.org/data/2.5/weather?"
+    apikey = open('apikey.txt', 'r').read()
+    city = "Delhi"
+    url = baseUrl + "appid=" + apikey + "&q=" + city
+    response = requests.get(url).json()
+    return response
+
+
+def fxfactsAPI():
+    limit = 1
+    api_url = 'https://api.api-ninjas.com/v1/facts?limit={1}'
+
+    apikeyFacts = open('apikeyfacts.txt', 'r').read()
+    response = requests.get(api_url, headers={apikeyFacts: 'YOUR_API_KEY'})
+
+    if response.status_code == requests.codes.ok:
+        return response.text
+    else:
+        return "Police detectives have used snapping turtles to help them locate dead bodies", response.status_code, response.text
+
+
 def fxgreetMsg():
     now = datetime.now()
 
@@ -30,6 +53,7 @@ def fxgreetMsg():
 
 
 greetMsg = fxgreetMsg()
+print(fxtempReturn("Delhi"))
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
@@ -47,8 +71,8 @@ app.layout = html.Div(style={'paddingTop': 50}, children=[
         ]),
 
         dbc.Row([
-            html.Div(html.B("<random fact>"),
-                     style={'fontSize': 25, 'color': '#FFF', 'textAlign': 'center',
+            html.Div(html.B(fxfactsAPI()[0]),
+                     style={'fontSize': 25, 'color': '#000', 'textAlign': 'center',
                             'marginBottom': 10})
 
         ]),
