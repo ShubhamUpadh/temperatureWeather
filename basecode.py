@@ -9,7 +9,7 @@ url = baseUrl + apiKey + "&q=" + city
 
 response = requests.get(url).json()
 
-print(response)
+# print(response)
 
 print(str(response['main']['temp'] - 273.15)[0:5])
-print(response['weather'][0]['id'])
+print(response['weather'][0]['description'])
